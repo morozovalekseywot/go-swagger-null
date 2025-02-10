@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // Bool is a nullable bool.
@@ -17,25 +17,26 @@ type Bool struct {
 }
 
 // NewBool creates a new Bool
-func NewBool(b, valid bool) Bool {
+func NewBool(value, valid bool) Bool {
 	return Bool{
-		Bool:  b,
+		Bool:  value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // BoolFrom creates a new Bool that will always be valid.
-func BoolFrom(b bool) Bool {
-	return NewBool(b, true)
+func BoolFrom(value bool) Bool {
+	return NewBool(value, true)
 }
 
 // BoolFromPtr creates a new Bool that will be null if f is nil.
-func BoolFromPtr(b *bool) Bool {
-	if b == nil {
+func BoolFromPtr(ptr *bool) Bool {
+	if ptr == nil {
 		return NewBool(false, false)
 	}
-	return NewBool(*b, true)
+
+	return NewBool(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -64,6 +65,7 @@ func (b *Bool) UnmarshalJSON(data []byte) error {
 	}
 
 	b.Valid = true
+
 	return nil
 }
 
@@ -86,43 +88,48 @@ func (b *Bool) UnmarshalText(text []byte) error {
 		return errors.New("invalid input:" + str)
 	}
 	b.Valid = true
+
 	return nil
 }
 
 // MarshalJSON implements json.Marshaler.
 func (b Bool) MarshalJSON() ([]byte, error) {
-	if !b.Valid {
+	if !b.IsValid() {
 		return NullBytes, nil
 	}
-	if !b.Bool {
-		return []byte("false"), nil
+
+	if b.Bool {
+		return []byte("true"), nil
 	}
-	return []byte("true"), nil
+
+	return []byte("false"), nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (b Bool) MarshalText() ([]byte, error) {
-	if !b.Valid {
+	if !b.IsValid() {
 		return []byte{}, nil
 	}
 	if !b.Bool {
 		return []byte("false"), nil
 	}
+
 	return []byte("true"), nil
 }
 
-// SetValid changes this Bool's value and also sets it to be non-null.
-func (b *Bool) SetValid(v bool) {
-	b.Bool = v
+// SetValue changes this Bool's value and also sets it to be non-null.
+func (b *Bool) SetValue(value bool) {
+	b.Bool = value
 	b.Valid = true
 	b.Set = true
 }
 
 // Ptr returns a pointer to this Bool's value, or a nil pointer if this Bool is null.
 func (b Bool) Ptr() *bool {
-	if !b.Valid {
+	if !b.IsValid() {
 		return nil
 	}
+
 	return &b.Bool
 }
 
@@ -137,14 +144,17 @@ func (b *Bool) Scan(value interface{}) error {
 		b.Bool, b.Valid, b.Set = false, false, false
 		return nil
 	}
+
 	b.Valid, b.Set = true, true
+
 	return convert.ConvertAssign(&b.Bool, value)
 }
 
 // Value implements the driver Valuer interface.
 func (b Bool) Value() (driver.Value, error) {
-	if !b.Valid {
+	if !b.IsValid() {
 		return nil, nil
 	}
+
 	return b.Bool, nil
 }

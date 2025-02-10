@@ -145,9 +145,9 @@ func TestBoolIsZero(t *testing.T) {
 
 func TestBoolSetValid(t *testing.T) {
 	change := NewBool(false, false)
-	assertNullBool(t, change, "SetValid()")
-	change.SetValid(true)
-	assertBool(t, change, "SetValid()")
+	assertNullBool(t, change, "SetValue()")
+	change.SetValue(true)
+	assertBool(t, change, "SetValue()")
 }
 
 func TestBoolScan(t *testing.T) {

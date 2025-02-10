@@ -155,9 +155,9 @@ func TestUint8IsZero(t *testing.T) {
 
 func TestUint8SetValid(t *testing.T) {
 	change := NewUint8(0, false)
-	assertNullUint8(t, change, "SetValid()")
-	change.SetValid(254)
-	assertUint8(t, change, "SetValid()")
+	assertNullUint8(t, change, "SetValue()")
+	change.SetValue(254)
+	assertUint8(t, change, "SetValue()")
 }
 
 func TestUint8Scan(t *testing.T) {

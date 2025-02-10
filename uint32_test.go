@@ -155,9 +155,9 @@ func TestUint32IsZero(t *testing.T) {
 
 func TestUint32SetValid(t *testing.T) {
 	change := NewUint32(0, false)
-	assertNullUint32(t, change, "SetValid()")
-	change.SetValid(4294967294)
-	assertUint32(t, change, "SetValid()")
+	assertNullUint32(t, change, "SetValue()")
+	change.SetValue(4294967294)
+	assertUint32(t, change, "SetValue()")
 }
 
 func TestUint32Scan(t *testing.T) {

@@ -137,9 +137,9 @@ func TestIntIsZero(t *testing.T) {
 
 func TestIntSetValid(t *testing.T) {
 	change := NewInt(0, false)
-	assertNullInt(t, change, "SetValid()")
-	change.SetValid(12345)
-	assertInt(t, change, "SetValid()")
+	assertNullInt(t, change, "SetValue()")
+	change.SetValue(12345)
+	assertInt(t, change, "SetValue()")
 }
 
 func TestIntScan(t *testing.T) {

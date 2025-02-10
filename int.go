@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // Int is an nullable int.
@@ -17,25 +17,26 @@ type Int struct {
 }
 
 // NewInt creates a new Int
-func NewInt(i int, valid bool) Int {
+func NewInt(value int, valid bool) Int {
 	return Int{
-		Int:   i,
+		Int:   value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // IntFrom creates a new Int that will always be valid.
-func IntFrom(i int) Int {
-	return NewInt(i, true)
+func IntFrom(value int) Int {
+	return NewInt(value, true)
 }
 
 // IntFromPtr creates a new Int that be null if i is nil.
-func IntFromPtr(i *int) Int {
-	if i == nil {
+func IntFromPtr(ptr *int) Int {
+	if ptr == nil {
 		return NewInt(0, false)
 	}
-	return NewInt(*i, true)
+
+	return NewInt(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -66,6 +67,7 @@ func (i *Int) UnmarshalJSON(data []byte) error {
 
 	i.Int = int(x)
 	i.Valid = true
+
 	return nil
 }
 
@@ -76,43 +78,48 @@ func (i *Int) UnmarshalText(text []byte) error {
 		i.Valid = false
 		return nil
 	}
+
 	var err error
 	res, err := strconv.ParseInt(string(text), 10, 0)
 	i.Valid = err == nil
 	if i.Valid {
 		i.Int = int(res)
 	}
+
 	return err
 }
 
 // MarshalJSON implements json.Marshaler.
 func (i Int) MarshalJSON() ([]byte, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return NullBytes, nil
 	}
+
 	return []byte(strconv.FormatInt(int64(i.Int), 10)), nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (i Int) MarshalText() ([]byte, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return []byte{}, nil
 	}
+
 	return []byte(strconv.FormatInt(int64(i.Int), 10)), nil
 }
 
-// SetValid changes this Int's value and also sets it to be non-null.
-func (i *Int) SetValid(n int) {
-	i.Int = n
+// SetValue changes this Int's value and also sets it to be non-null.
+func (i *Int) SetValue(value int) {
+	i.Int = value
 	i.Valid = true
 	i.Set = true
 }
 
 // Ptr returns a pointer to this Int's value, or a nil pointer if this Int is null.
 func (i Int) Ptr() *int {
-	if !i.Valid {
+	if !i.IsValid() {
 		return nil
 	}
+
 	return &i.Int
 }
 
@@ -127,14 +134,17 @@ func (i *Int) Scan(value interface{}) error {
 		i.Int, i.Valid, i.Set = 0, false, false
 		return nil
 	}
+
 	i.Valid, i.Set = true, true
+
 	return convert.ConvertAssign(&i.Int, value)
 }
 
 // Value implements the driver Valuer interface.
 func (i Int) Value() (driver.Value, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return nil, nil
 	}
+
 	return int64(i.Int), nil
 }

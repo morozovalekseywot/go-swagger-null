@@ -155,9 +155,9 @@ func TestInt64IsZero(t *testing.T) {
 
 func TestInt64SetValid(t *testing.T) {
 	change := NewInt64(0, false)
-	assertNullInt64(t, change, "SetValid()")
-	change.SetValid(9223372036854775806)
-	assertInt64(t, change, "SetValid()")
+	assertNullInt64(t, change, "SetValue()")
+	change.SetValue(9223372036854775806)
+	assertInt64(t, change, "SetValue()")
 }
 
 func TestInt64Scan(t *testing.T) {

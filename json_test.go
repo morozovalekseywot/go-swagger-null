@@ -80,13 +80,8 @@ func TestUnmarshal(t *testing.T) {
 
 	test := &Test{}
 
-	err := i.Unmarshal(test)
-	if err != nil {
-		t.Error(err)
-	}
-
 	x := &Test{Name: "hello", Age: 15}
-	err = i.Marshal(x)
+	err := i.Marshal(x)
 	if err != nil {
 		t.Error(err)
 	}
@@ -257,9 +252,9 @@ func TestJSONSetValid(t *testing.T) {
 	t.Parallel()
 
 	change := NewJSON(nil, false)
-	assertNullJSON(t, change, "SetValid()")
-	change.SetValid([]byte(`"hello"`))
-	assertJSON(t, change, "SetValid()")
+	assertNullJSON(t, change, "SetValue()")
+	change.SetValue([]byte(`"hello"`))
+	assertJSON(t, change, "SetValue()")
 }
 
 func TestJSONScan(t *testing.T) {

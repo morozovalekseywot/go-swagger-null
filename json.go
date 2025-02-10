@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // JSON is a nullable []byte that contains JSON.
@@ -24,26 +24,26 @@ type JSON struct {
 }
 
 // NewJSON creates a new JSON
-func NewJSON(b []byte, valid bool) JSON {
+func NewJSON(value []byte, valid bool) JSON {
 	return JSON{
-		JSON:  b,
+		JSON:  value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // JSONFrom creates a new JSON that will be invalid if nil.
-func JSONFrom(b []byte) JSON {
-	return NewJSON(b, b != nil)
+func JSONFrom(value []byte) JSON {
+	return NewJSON(value, value != nil)
 }
 
 // JSONFromPtr creates a new JSON that will be invalid if nil.
-func JSONFromPtr(b *[]byte) JSON {
-	if b == nil {
+func JSONFromPtr(ptr *[]byte) JSON {
+	if ptr == nil {
 		return NewJSON(nil, false)
 	}
-	n := NewJSON(*b, true)
-	return n
+
+	return NewJSON(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -80,9 +80,9 @@ func (j JSON) Unmarshal(dest interface{}) error {
 //
 // Example if you have a struct with a null.JSON called v:
 //
-// 		{}          -> does not call unmarshaljson: !set & !valid
-// 		{"v": null} -> calls unmarshaljson, set & !valid
-//      {"v": {}}   -> calls unmarshaljson, set & valid (json value is '{}')
+//			{}          -> does not call unmarshaljson: !set & !valid
+//			{"v": null} -> calls unmarshaljson, set & !valid
+//	     {"v": {}}   -> calls unmarshaljson, set & valid (json value is '{}')
 //
 // That's to say if 'null' is passed in at the json level we do not capture that
 // value - instead we set the value-level null flag so that an sql value will
@@ -137,32 +137,35 @@ func (j *JSON) Marshal(obj interface{}) error {
 
 // MarshalJSON implements json.Marshaler.
 func (j JSON) MarshalJSON() ([]byte, error) {
-	if len(j.JSON) == 0 || j.JSON == nil {
+	if !j.Set || len(j.JSON) == 0 || j.JSON == nil {
 		return NullBytes, nil
 	}
+
 	return j.JSON, nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (j JSON) MarshalText() ([]byte, error) {
-	if !j.Valid {
-		return nil, nil
+	if !j.IsValid() {
+		return []byte{}, nil
 	}
+
 	return j.JSON, nil
 }
 
-// SetValid changes this JSON's value and also sets it to be non-null.
-func (j *JSON) SetValid(n []byte) {
-	j.JSON = n
+// SetValue changes this JSON's value and also sets it to be non-null.
+func (j *JSON) SetValue(value []byte) {
+	j.JSON = value
 	j.Valid = true
 	j.Set = true
 }
 
 // Ptr returns a pointer to this JSON's value, or a nil pointer if this JSON is null.
 func (j JSON) Ptr() *[]byte {
-	if !j.Valid {
+	if !j.IsValid() {
 		return nil
 	}
+
 	return &j.JSON
 }
 
@@ -177,14 +180,17 @@ func (j *JSON) Scan(value interface{}) error {
 		j.JSON, j.Valid, j.Set = nil, false, false
 		return nil
 	}
+
 	j.Valid, j.Set = true, true
+
 	return convert.ConvertAssign(&j.JSON, value)
 }
 
 // Value implements the driver Valuer interface.
 func (j JSON) Value() (driver.Value, error) {
-	if !j.Valid {
+	if !j.IsValid() {
 		return nil, nil
 	}
+
 	return j.JSON, nil
 }

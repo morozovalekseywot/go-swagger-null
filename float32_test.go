@@ -128,9 +128,9 @@ func TestFloat32IsZero(t *testing.T) {
 
 func TestFloat32SetValid(t *testing.T) {
 	change := NewFloat32(0, false)
-	assertNullFloat32(t, change, "SetValid()")
-	change.SetValid(1.2345)
-	assertFloat32(t, change, "SetValid()")
+	assertNullFloat32(t, change, "SetValue()")
+	change.SetValue(1.2345)
+	assertFloat32(t, change, "SetValue()")
 }
 
 func TestFloat32Scan(t *testing.T) {

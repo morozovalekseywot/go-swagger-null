@@ -137,9 +137,9 @@ func TestUint64IsZero(t *testing.T) {
 
 func TestUint64SetValid(t *testing.T) {
 	change := NewUint64(0, false)
-	assertNullUint64(t, change, "SetValid()")
-	change.SetValid(18446744073709551614)
-	assertUint64(t, change, "SetValid()")
+	assertNullUint64(t, change, "SetValue()")
+	change.SetValue(18446744073709551614)
+	assertUint64(t, change, "SetValue()")
 }
 
 func TestUint64Scan(t *testing.T) {

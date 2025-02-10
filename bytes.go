@@ -5,7 +5,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // NullBytes is a global byte slice of JSON null
@@ -19,26 +19,26 @@ type Bytes struct {
 }
 
 // NewBytes creates a new Bytes
-func NewBytes(b []byte, valid bool) Bytes {
+func NewBytes(value []byte, valid bool) Bytes {
 	return Bytes{
-		Bytes: b,
+		Bytes: value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // BytesFrom creates a new Bytes that will be invalid if nil.
-func BytesFrom(b []byte) Bytes {
-	return NewBytes(b, b != nil)
+func BytesFrom(value []byte) Bytes {
+	return NewBytes(value, value != nil)
 }
 
 // BytesFromPtr creates a new Bytes that will be invalid if nil.
-func BytesFromPtr(b *[]byte) Bytes {
-	if b == nil {
+func BytesFromPtr(ptr *[]byte) Bytes {
+	if ptr == nil {
 		return NewBytes(nil, false)
 	}
-	n := NewBytes(*b, true)
-	return n
+
+	return NewBytes(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -69,6 +69,7 @@ func (b *Bytes) UnmarshalJSON(data []byte) error {
 
 	b.Bytes = bv
 	b.Valid = true
+
 	return nil
 }
 
@@ -91,29 +92,32 @@ func (b Bytes) MarshalJSON() ([]byte, error) {
 	if len(b.Bytes) == 0 {
 		return NullBytes, nil
 	}
+
 	return json.Marshal(b.Bytes)
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (b Bytes) MarshalText() ([]byte, error) {
-	if !b.Valid {
-		return nil, nil
+	if !b.IsValid() {
+		return []byte{}, nil
 	}
+
 	return b.Bytes, nil
 }
 
-// SetValid changes this Bytes's value and also sets it to be non-null.
-func (b *Bytes) SetValid(n []byte) {
-	b.Bytes = n
+// SetValue changes this Bytes's value and also sets it to be non-null.
+func (b *Bytes) SetValue(value []byte) {
+	b.Bytes = value
 	b.Valid = true
 	b.Set = true
 }
 
 // Ptr returns a pointer to this Bytes's value, or a nil pointer if this Bytes is null.
 func (b Bytes) Ptr() *[]byte {
-	if !b.Valid {
+	if !b.IsValid() {
 		return nil
 	}
+
 	return &b.Bytes
 }
 
@@ -128,14 +132,17 @@ func (b *Bytes) Scan(value interface{}) error {
 		b.Bytes, b.Valid, b.Set = nil, false, false
 		return nil
 	}
+
 	b.Valid, b.Set = true, true
+
 	return convert.ConvertAssign(&b.Bytes, value)
 }
 
 // Value implements the driver Valuer interface.
 func (b Bytes) Value() (driver.Value, error) {
-	if !b.Valid {
+	if !b.IsValid() {
 		return nil, nil
 	}
+
 	return b.Bytes, nil
 }

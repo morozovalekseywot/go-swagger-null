@@ -8,7 +8,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // Int32 is an nullable int32.
@@ -19,25 +19,26 @@ type Int32 struct {
 }
 
 // NewInt32 creates a new Int32
-func NewInt32(i int32, valid bool) Int32 {
+func NewInt32(value int32, valid bool) Int32 {
 	return Int32{
-		Int32: i,
+		Int32: value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // Int32From creates a new Int32 that will always be valid.
-func Int32From(i int32) Int32 {
-	return NewInt32(i, true)
+func Int32From(value int32) Int32 {
+	return NewInt32(value, true)
 }
 
 // Int32FromPtr creates a new Int32 that be null if i is nil.
-func Int32FromPtr(i *int32) Int32 {
-	if i == nil {
+func Int32FromPtr(ptr *int32) Int32 {
+	if ptr == nil {
 		return NewInt32(0, false)
 	}
-	return NewInt32(*i, true)
+
+	return NewInt32(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -71,6 +72,7 @@ func (i *Int32) UnmarshalJSON(data []byte) error {
 
 	i.Int32 = int32(x)
 	i.Valid = true
+
 	return nil
 }
 
@@ -81,43 +83,48 @@ func (i *Int32) UnmarshalText(text []byte) error {
 		i.Valid = false
 		return nil
 	}
+
 	var err error
 	res, err := strconv.ParseInt(string(text), 10, 32)
 	i.Valid = err == nil
 	if i.Valid {
 		i.Int32 = int32(res)
 	}
+
 	return err
 }
 
 // MarshalJSON implements json.Marshaler.
 func (i Int32) MarshalJSON() ([]byte, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return NullBytes, nil
 	}
+
 	return []byte(strconv.FormatInt(int64(i.Int32), 10)), nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (i Int32) MarshalText() ([]byte, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return []byte{}, nil
 	}
+
 	return []byte(strconv.FormatInt(int64(i.Int32), 10)), nil
 }
 
-// SetValid changes this Int32's value and also sets it to be non-null.
-func (i *Int32) SetValid(n int32) {
-	i.Int32 = n
+// SetValue changes this Int32's value and also sets it to be non-null.
+func (i *Int32) SetValue(value int32) {
+	i.Int32 = value
 	i.Valid = true
 	i.Set = true
 }
 
 // Ptr returns a pointer to this Int32's value, or a nil pointer if this Int32 is null.
 func (i Int32) Ptr() *int32 {
-	if !i.Valid {
+	if !i.IsValid() {
 		return nil
 	}
+
 	return &i.Int32
 }
 
@@ -132,14 +139,17 @@ func (i *Int32) Scan(value interface{}) error {
 		i.Int32, i.Valid, i.Set = 0, false, false
 		return nil
 	}
+
 	i.Valid, i.Set = true, true
+
 	return convert.ConvertAssign(&i.Int32, value)
 }
 
 // Value implements the driver Valuer interface.
 func (i Int32) Value() (driver.Value, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return nil, nil
 	}
+
 	return int64(i.Int32), nil
 }

@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // Int64 is an nullable int64.
@@ -17,25 +17,26 @@ type Int64 struct {
 }
 
 // NewInt64 creates a new Int64
-func NewInt64(i int64, valid bool) Int64 {
+func NewInt64(value int64, valid bool) Int64 {
 	return Int64{
-		Int64: i,
+		Int64: value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // Int64From creates a new Int64 that will always be valid.
-func Int64From(i int64) Int64 {
-	return NewInt64(i, true)
+func Int64From(value int64) Int64 {
+	return NewInt64(value, true)
 }
 
 // Int64FromPtr creates a new Int64 that be null if i is nil.
-func Int64FromPtr(i *int64) Int64 {
-	if i == nil {
+func Int64FromPtr(ptr *int64) Int64 {
+	if ptr == nil {
 		return NewInt64(0, false)
 	}
-	return NewInt64(*i, true)
+
+	return NewInt64(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -63,6 +64,7 @@ func (i *Int64) UnmarshalJSON(data []byte) error {
 	}
 
 	i.Valid = true
+
 	return nil
 }
 
@@ -73,40 +75,45 @@ func (i *Int64) UnmarshalText(text []byte) error {
 		i.Valid = false
 		return nil
 	}
+
 	var err error
 	i.Int64, err = strconv.ParseInt(string(text), 10, 64)
 	i.Valid = err == nil
+
 	return err
 }
 
 // MarshalJSON implements json.Marshaler.
 func (i Int64) MarshalJSON() ([]byte, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return NullBytes, nil
 	}
+
 	return []byte(strconv.FormatInt(i.Int64, 10)), nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (i Int64) MarshalText() ([]byte, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return []byte{}, nil
 	}
+
 	return []byte(strconv.FormatInt(i.Int64, 10)), nil
 }
 
-// SetValid changes this Int64's value and also sets it to be non-null.
-func (i *Int64) SetValid(n int64) {
-	i.Int64 = n
+// SetValue changes this Int64's value and also sets it to be non-null.
+func (i *Int64) SetValue(value int64) {
+	i.Int64 = value
 	i.Valid = true
 	i.Set = true
 }
 
 // Ptr returns a pointer to this Int64's value, or a nil pointer if this Int64 is null.
 func (i Int64) Ptr() *int64 {
-	if !i.Valid {
+	if !i.IsValid() {
 		return nil
 	}
+
 	return &i.Int64
 }
 
@@ -121,14 +128,17 @@ func (i *Int64) Scan(value interface{}) error {
 		i.Int64, i.Valid, i.Set = 0, false, false
 		return nil
 	}
+
 	i.Valid, i.Set = true, true
+
 	return convert.ConvertAssign(&i.Int64, value)
 }
 
 // Value implements the driver Valuer interface.
 func (i Int64) Value() (driver.Value, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return nil, nil
 	}
+
 	return i.Int64, nil
 }

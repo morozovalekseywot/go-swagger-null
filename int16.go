@@ -8,7 +8,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // Int16 is an nullable int16.
@@ -19,25 +19,26 @@ type Int16 struct {
 }
 
 // NewInt16 creates a new Int16
-func NewInt16(i int16, valid bool) Int16 {
+func NewInt16(value int16, valid bool) Int16 {
 	return Int16{
-		Int16: i,
+		Int16: value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // Int16From creates a new Int16 that will always be valid.
-func Int16From(i int16) Int16 {
-	return NewInt16(i, true)
+func Int16From(value int16) Int16 {
+	return NewInt16(value, true)
 }
 
 // Int16FromPtr creates a new Int16 that be null if i is nil.
-func Int16FromPtr(i *int16) Int16 {
-	if i == nil {
+func Int16FromPtr(ptr *int16) Int16 {
+	if ptr == nil {
 		return NewInt16(0, false)
 	}
-	return NewInt16(*i, true)
+
+	return NewInt16(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -69,6 +70,7 @@ func (i *Int16) UnmarshalJSON(data []byte) error {
 	}
 
 	i.Int16, i.Valid = int16(x), true
+
 	return nil
 }
 
@@ -79,43 +81,48 @@ func (i *Int16) UnmarshalText(text []byte) error {
 		i.Valid = false
 		return nil
 	}
+
 	var err error
 	res, err := strconv.ParseInt(string(text), 10, 16)
 	i.Valid = err == nil
 	if i.Valid {
 		i.Int16 = int16(res)
 	}
+
 	return err
 }
 
 // MarshalJSON implements json.Marshaler.
 func (i Int16) MarshalJSON() ([]byte, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return NullBytes, nil
 	}
+
 	return []byte(strconv.FormatInt(int64(i.Int16), 10)), nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (i Int16) MarshalText() ([]byte, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return []byte{}, nil
 	}
+
 	return []byte(strconv.FormatInt(int64(i.Int16), 10)), nil
 }
 
-// SetValid changes this Int16's value and also sets it to be non-null.
-func (i *Int16) SetValid(n int16) {
-	i.Int16 = n
+// SetValue changes this Int16's value and also sets it to be non-null.
+func (i *Int16) SetValue(value int16) {
+	i.Int16 = value
 	i.Valid = true
 	i.Set = true
 }
 
 // Ptr returns a pointer to this Int16's value, or a nil pointer if this Int16 is null.
 func (i Int16) Ptr() *int16 {
-	if !i.Valid {
+	if !i.IsValid() {
 		return nil
 	}
+
 	return &i.Int16
 }
 
@@ -130,14 +137,17 @@ func (i *Int16) Scan(value interface{}) error {
 		i.Int16, i.Valid, i.Set = 0, false, false
 		return nil
 	}
+
 	i.Valid, i.Set = true, true
+
 	return convert.ConvertAssign(&i.Int16, value)
 }
 
 // Value implements the driver Valuer interface.
 func (i Int16) Value() (driver.Value, error) {
-	if !i.Valid {
+	if !i.IsValid() {
 		return nil, nil
 	}
+
 	return int64(i.Int16), nil
 }

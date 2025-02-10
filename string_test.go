@@ -157,9 +157,9 @@ func TestStringIsZero(t *testing.T) {
 
 func TestStringSetValid(t *testing.T) {
 	change := NewString("", false)
-	assertNullStr(t, change, "SetValid()")
-	change.SetValid("test")
-	assertStr(t, change, "SetValid()")
+	assertNullStr(t, change, "SetValue()")
+	change.SetValue("test")
+	assertStr(t, change, "SetValue()")
 }
 
 func TestStringScan(t *testing.T) {

@@ -30,8 +30,8 @@ func TestUnmarshalTimeJSON(t *testing.T) {
 
 	var invalid Time
 	err = invalid.UnmarshalJSON(invalidJSON)
-	if _, ok := err.(*time.ParseError); !ok {
-		t.Errorf("expected json.ParseError, not %T", err)
+	if err == nil || err.Error() != "Time.UnmarshalJSON: input is not a JSON string" {
+		t.Error("Error must be 'Time.UnmarshalJSON: input is not a JSON string'")
 	}
 	assertNullTime(t, invalid, "invalid from object json")
 
@@ -97,9 +97,9 @@ func TestTimeFromPtr(t *testing.T) {
 func TestTimeSetValid(t *testing.T) {
 	var ti time.Time
 	change := NewTime(ti, false)
-	assertNullTime(t, change, "SetValid()")
-	change.SetValid(timeValue)
-	assertTime(t, change, "SetValid()")
+	assertNullTime(t, change, "SetValue()")
+	change.SetValue(timeValue)
+	assertTime(t, change, "SetValue()")
 }
 
 func TestTimePointer(t *testing.T) {

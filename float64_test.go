@@ -128,9 +128,9 @@ func TestFloat64IsZero(t *testing.T) {
 
 func TestFloat64SetValid(t *testing.T) {
 	change := NewFloat64(0, false)
-	assertNullFloat64(t, change, "SetValid()")
-	change.SetValid(1.2345)
-	assertFloat64(t, change, "SetValid()")
+	assertNullFloat64(t, change, "SetValue()")
+	change.SetValue(1.2345)
+	assertFloat64(t, change, "SetValue()")
 }
 
 func TestFloat64Scan(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // Uint is an nullable uint.
@@ -17,25 +17,26 @@ type Uint struct {
 }
 
 // NewUint creates a new Uint
-func NewUint(i uint, valid bool) Uint {
+func NewUint(value uint, valid bool) Uint {
 	return Uint{
-		Uint:  i,
+		Uint:  value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // UintFrom creates a new Uint that will always be valid.
-func UintFrom(i uint) Uint {
-	return NewUint(i, true)
+func UintFrom(value uint) Uint {
+	return NewUint(value, true)
 }
 
 // UintFromPtr creates a new Uint that be null if i is nil.
-func UintFromPtr(i *uint) Uint {
-	if i == nil {
+func UintFromPtr(ptr *uint) Uint {
+	if ptr == nil {
 		return NewUint(0, false)
 	}
-	return NewUint(*i, true)
+
+	return NewUint(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -65,6 +66,7 @@ func (u *Uint) UnmarshalJSON(data []byte) error {
 
 	u.Uint = uint(x)
 	u.Valid = true
+
 	return nil
 }
 
@@ -75,43 +77,48 @@ func (u *Uint) UnmarshalText(text []byte) error {
 		u.Valid = false
 		return nil
 	}
+
 	var err error
 	res, err := strconv.ParseUint(string(text), 10, 0)
 	u.Valid = err == nil
 	if u.Valid {
 		u.Uint = uint(res)
 	}
+
 	return err
 }
 
 // MarshalJSON implements json.Marshaler.
 func (u Uint) MarshalJSON() ([]byte, error) {
-	if !u.Valid {
+	if !u.IsValid() {
 		return NullBytes, nil
 	}
+
 	return []byte(strconv.FormatUint(uint64(u.Uint), 10)), nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (u Uint) MarshalText() ([]byte, error) {
-	if !u.Valid {
+	if !u.IsValid() {
 		return []byte{}, nil
 	}
+
 	return []byte(strconv.FormatUint(uint64(u.Uint), 10)), nil
 }
 
-// SetValid changes this Uint's value and also sets it to be non-null.
-func (u *Uint) SetValid(n uint) {
-	u.Uint = n
+// SetValue changes this Uint's value and also sets it to be non-null.
+func (u *Uint) SetValue(value uint) {
+	u.Uint = value
 	u.Valid = true
 	u.Set = true
 }
 
 // Ptr returns a pointer to this Uint's value, or a nil pointer if this Uint is null.
 func (u Uint) Ptr() *uint {
-	if !u.Valid {
+	if !u.IsValid() {
 		return nil
 	}
+
 	return &u.Uint
 }
 
@@ -126,14 +133,17 @@ func (u *Uint) Scan(value interface{}) error {
 		u.Uint, u.Valid, u.Set = 0, false, false
 		return nil
 	}
+
 	u.Valid, u.Set = true, true
+
 	return convert.ConvertAssign(&u.Uint, value)
 }
 
 // Value implements the driver Valuer interface.
 func (u Uint) Value() (driver.Value, error) {
-	if !u.Valid {
+	if !u.IsValid() {
 		return nil, nil
 	}
+
 	return int64(u.Uint), nil
 }

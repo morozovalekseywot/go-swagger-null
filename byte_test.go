@@ -128,9 +128,9 @@ func TestByteIsZero(t *testing.T) {
 
 func TestByteSetValid(t *testing.T) {
 	change := NewByte(0, false)
-	assertNullByte(t, change, "SetValid()")
-	change.SetValid('b')
-	assertByte(t, change, "SetValid()")
+	assertNullByte(t, change, "SetValue()")
+	change.SetValue('b')
+	assertByte(t, change, "SetValue()")
 }
 
 func TestByteScan(t *testing.T) {

@@ -136,9 +136,9 @@ func TestBytesIsZero(t *testing.T) {
 
 func TestBytesSetValid(t *testing.T) {
 	change := NewBytes(nil, false)
-	assertNullBytes(t, change, "SetValid()")
-	change.SetValid(hello)
-	assertBytes(t, change, "SetValid()")
+	assertNullBytes(t, change, "SetValue()")
+	change.SetValue(hello)
+	assertBytes(t, change, "SetValue()")
 }
 
 func TestBytesScan(t *testing.T) {

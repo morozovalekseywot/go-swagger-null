@@ -15,25 +15,26 @@ type Time struct {
 }
 
 // NewTime creates a new Time.
-func NewTime(t time.Time, valid bool) Time {
+func NewTime(value time.Time, valid bool) Time {
 	return Time{
-		Time:  t,
+		Time:  value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // TimeFrom creates a new Time that will always be valid.
-func TimeFrom(t time.Time) Time {
-	return NewTime(t, true)
+func TimeFrom(value time.Time) Time {
+	return NewTime(value, true)
 }
 
 // TimeFromPtr creates a new Time that will be null if t is nil.
-func TimeFromPtr(t *time.Time) Time {
-	if t == nil {
+func TimeFromPtr(ptr *time.Time) Time {
+	if ptr == nil {
 		return NewTime(time.Time{}, false)
 	}
-	return NewTime(*t, true)
+
+	return NewTime(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -49,9 +50,10 @@ func (t Time) IsSet() bool {
 
 // MarshalJSON implements json.Marshaler.
 func (t Time) MarshalJSON() ([]byte, error) {
-	if !t.Valid {
+	if !t.IsValid() {
 		return NullBytes, nil
 	}
+
 	return t.Time.MarshalJSON()
 }
 
@@ -69,14 +71,16 @@ func (t *Time) UnmarshalJSON(data []byte) error {
 	}
 
 	t.Valid = true
+
 	return nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (t Time) MarshalText() ([]byte, error) {
-	if !t.Valid {
-		return NullBytes, nil
+	if !t.IsValid() {
+		return []byte{}, nil
 	}
+
 	return t.Time.MarshalText()
 }
 
@@ -90,22 +94,25 @@ func (t *Time) UnmarshalText(text []byte) error {
 	if err := t.Time.UnmarshalText(text); err != nil {
 		return err
 	}
+
 	t.Valid = true
+
 	return nil
 }
 
-// SetValid changes this Time's value and sets it to be non-null.
-func (t *Time) SetValid(v time.Time) {
-	t.Time = v
+// SetValue changes this Time's value and sets it to be non-null.
+func (t *Time) SetValue(value time.Time) {
+	t.Time = value
 	t.Valid = true
 	t.Set = true
 }
 
 // Ptr returns a pointer to this Time's value, or a nil pointer if this Time is null.
 func (t Time) Ptr() *time.Time {
-	if !t.Valid {
+	if !t.IsValid() {
 		return nil
 	}
+
 	return &t.Time
 }
 
@@ -126,16 +133,21 @@ func (t *Time) Scan(value interface{}) error {
 	default:
 		err = fmt.Errorf("null: cannot scan type %T into null.Time: %v", value, value)
 	}
-	if err == nil {
-		t.Valid, t.Set = true, true
+
+	if err != nil {
+		return err
 	}
-	return err
+
+	t.Valid, t.Set = true, true
+
+	return nil
 }
 
 // Value implements the driver Valuer interface.
 func (t Time) Value() (driver.Value, error) {
-	if !t.Valid {
+	if !t.IsValid() {
 		return nil, nil
 	}
+
 	return t.Time, nil
 }

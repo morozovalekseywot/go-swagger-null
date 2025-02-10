@@ -5,7 +5,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // String is a nullable string. It supports SQL and JSON serialization.
@@ -16,16 +16,17 @@ type String struct {
 }
 
 // StringFrom creates a new String that will never be blank.
-func StringFrom(s string) String {
-	return NewString(s, true)
+func StringFrom(value string) String {
+	return NewString(value, true)
 }
 
 // StringFromPtr creates a new String that be null if s is nil.
-func StringFromPtr(s *string) String {
-	if s == nil {
+func StringFromPtr(ptr *string) String {
+	if ptr == nil {
 		return NewString("", false)
 	}
-	return NewString(*s, true)
+
+	return NewString(*ptr, true)
 }
 
 // NewString creates a new String
@@ -62,22 +63,25 @@ func (s *String) UnmarshalJSON(data []byte) error {
 	}
 
 	s.Valid = true
+
 	return nil
 }
 
 // MarshalJSON implements json.Marshaler.
 func (s String) MarshalJSON() ([]byte, error) {
-	if !s.Valid {
+	if !s.IsValid() {
 		return NullBytes, nil
 	}
+
 	return json.Marshal(s.String)
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (s String) MarshalText() ([]byte, error) {
-	if !s.Valid {
+	if !s.IsValid() {
 		return []byte{}, nil
 	}
+
 	return []byte(s.String), nil
 }
 
@@ -91,21 +95,23 @@ func (s *String) UnmarshalText(text []byte) error {
 
 	s.String = string(text)
 	s.Valid = true
+
 	return nil
 }
 
-// SetValid changes this String's value and also sets it to be non-null.
-func (s *String) SetValid(v string) {
-	s.String = v
+// SetValue changes this String's value and also sets it to be non-null.
+func (s *String) SetValue(value string) {
+	s.String = value
 	s.Valid = true
 	s.Set = true
 }
 
 // Ptr returns a pointer to this String's value, or a nil pointer if this String is null.
 func (s String) Ptr() *string {
-	if !s.Valid {
+	if !s.IsValid() {
 		return nil
 	}
+
 	return &s.String
 }
 
@@ -120,14 +126,17 @@ func (s *String) Scan(value interface{}) error {
 		s.String, s.Valid, s.Set = "", false, false
 		return nil
 	}
+
 	s.Valid, s.Set = true, true
+
 	return convert.ConvertAssign(&s.String, value)
 }
 
 // Value implements the driver Valuer interface.
 func (s String) Value() (driver.Value, error) {
-	if !s.Valid {
+	if !s.IsValid() {
 		return nil, nil
 	}
+
 	return s.String, nil
 }

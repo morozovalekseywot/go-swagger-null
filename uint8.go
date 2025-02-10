@@ -8,7 +8,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/volatiletech/null/v9/convert"
+	"github.com/morozovalekseywot/null/convert"
 )
 
 // Uint8 is an nullable uint8.
@@ -19,25 +19,26 @@ type Uint8 struct {
 }
 
 // NewUint8 creates a new Uint8
-func NewUint8(i uint8, valid bool) Uint8 {
+func NewUint8(value uint8, valid bool) Uint8 {
 	return Uint8{
-		Uint8: i,
+		Uint8: value,
 		Valid: valid,
 		Set:   true,
 	}
 }
 
 // Uint8From creates a new Uint8 that will always be valid.
-func Uint8From(i uint8) Uint8 {
-	return NewUint8(i, true)
+func Uint8From(value uint8) Uint8 {
+	return NewUint8(value, true)
 }
 
 // Uint8FromPtr creates a new Uint8 that be null if i is nil.
-func Uint8FromPtr(i *uint8) Uint8 {
-	if i == nil {
+func Uint8FromPtr(ptr *uint8) Uint8 {
+	if ptr == nil {
 		return NewUint8(0, false)
 	}
-	return NewUint8(*i, true)
+
+	return NewUint8(*ptr, true)
 }
 
 // IsValid returns true if this carries and explicit value and
@@ -71,6 +72,7 @@ func (u *Uint8) UnmarshalJSON(data []byte) error {
 
 	u.Uint8 = uint8(x)
 	u.Valid = true
+
 	return nil
 }
 
@@ -81,43 +83,48 @@ func (u *Uint8) UnmarshalText(text []byte) error {
 		u.Valid = false
 		return nil
 	}
+
 	var err error
 	res, err := strconv.ParseUint(string(text), 10, 8)
 	u.Valid = err == nil
 	if u.Valid {
 		u.Uint8 = uint8(res)
 	}
+
 	return err
 }
 
 // MarshalJSON implements json.Marshaler.
 func (u Uint8) MarshalJSON() ([]byte, error) {
-	if !u.Valid {
+	if !u.IsValid() {
 		return NullBytes, nil
 	}
+
 	return []byte(strconv.FormatUint(uint64(u.Uint8), 10)), nil
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (u Uint8) MarshalText() ([]byte, error) {
-	if !u.Valid {
+	if !u.IsValid() {
 		return []byte{}, nil
 	}
+
 	return []byte(strconv.FormatUint(uint64(u.Uint8), 10)), nil
 }
 
-// SetValid changes this Uint8's value and also sets it to be non-null.
-func (u *Uint8) SetValid(n uint8) {
-	u.Uint8 = n
+// SetValue changes this Uint8's value and also sets it to be non-null.
+func (u *Uint8) SetValue(value uint8) {
+	u.Uint8 = value
 	u.Valid = true
 	u.Set = true
 }
 
 // Ptr returns a pointer to this Uint8's value, or a nil pointer if this Uint8 is null.
 func (u Uint8) Ptr() *uint8 {
-	if !u.Valid {
+	if !u.IsValid() {
 		return nil
 	}
+
 	return &u.Uint8
 }
 
@@ -132,14 +139,17 @@ func (u *Uint8) Scan(value interface{}) error {
 		u.Uint8, u.Valid, u.Set = 0, false, false
 		return nil
 	}
+
 	u.Valid, u.Set = true, true
+
 	return convert.ConvertAssign(&u.Uint8, value)
 }
 
 // Value implements the driver Valuer interface.
 func (u Uint8) Value() (driver.Value, error) {
-	if !u.Valid {
+	if !u.IsValid() {
 		return nil, nil
 	}
+
 	return int64(u.Uint8), nil
 }

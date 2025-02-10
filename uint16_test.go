@@ -155,9 +155,9 @@ func TestUint16IsZero(t *testing.T) {
 
 func TestUint16SetValid(t *testing.T) {
 	change := NewUint16(0, false)
-	assertNullUint16(t, change, "SetValid()")
-	change.SetValid(65534)
-	assertUint16(t, change, "SetValid()")
+	assertNullUint16(t, change, "SetValue()")
+	change.SetValue(65534)
+	assertUint16(t, change, "SetValue()")
 }
 
 func TestUint16Scan(t *testing.T) {
